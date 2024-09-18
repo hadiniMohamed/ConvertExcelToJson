@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel to JSON Converter</title>
+    <style>
+        /* General Page Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        /* Container for the form */
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        /* File input styling */
+        input[type="file"] {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        /* Button styling */
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 10px auto;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Form section for selecting columns */
+        #columnSelection {
+            display: none;
+            margin-top: 20px;
+        }
+
+        /* Checkbox styling */
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        /* JSON filename input */
+        #json_filename {
+            padding: 10px;
+            width: calc(100% - 24px);
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            display: block;
+            margin: 10px auto;
+        }
+
+        /* Columns checkboxes */
+        #columnsCheckboxes {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Excel to JSON Converter</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" id="fileInput" name="file" accept=".xlsx, .xls" required>
+            <button type="button" onclick="uploadFile()">Upload and Select Columns</button>
+        </form>
+
+        <div id="columnSelection">
+            <h2>Select Columns to Convert:</h2>
+            <form id="convertForm" enctype="multipart/form-data">
+                <div id="columnsCheckboxes"></div>
+                <label for="json_filename">JSON Filename:</label>
+                <input type="text" id="json_filename" name="json_filename" required placeholder="Enter JSON filename">
+                <button type="button" onclick="convertToJson()">Convert to JSON</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function uploadFile() {
+            const formData = new FormData();
+            const fileInput = document.getElementById('fileInput');
+            formData.append('file', fileInput.files[0]);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())  // Parse the response as JSON
+            .then(data => {
+                const columns = data.columns;  // Access the 'columns' field
+                const columnsCheckboxes = document.getElementById('columnsCheckboxes');
+                columnsCheckboxes.innerHTML = '';  // Clear previous checkboxes
+
+                // Ensure the columns variable is an array before using forEach
+                if (Array.isArray(columns)) {
+                    columns.forEach(column => {
+                        columnsCheckboxes.innerHTML += `<input type="checkbox" name="columns" value="${column}">${column}<br>`;
+                    });
+                    document.getElementById('columnSelection').style.display = 'block';
+                } else {
+                    console.error('Columns is not an array');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function convertToJson() {
+            const convertForm = document.getElementById('convertForm');
+            const formData = new FormData(convertForm);
+            formData.append('file', document.getElementById('fileInput').files[0]);
+
+            fetch('/convert', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = document.getElementById('json_filename').value + '.json';
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
