@@ -20,11 +20,11 @@ Ce projet est une application web développée avec Flask qui permet de converti
 1. Clonez ce dépôt sur votre machine locale :
 
    ```bash
-   git clone https://github.com/votre-utilisateur/votre-repo.git
+   git clone https://github.com/hadiniMohamed/ConvertExcelToJson.git
 2. Accédez au répertoire du projet :
     
     ```bash
-    cd excel-to-json-converter
+    cd ConvertExcelToJson
 3. Installez les dépendances :
 
     Si vous avez déjà un fichier requirements.txt avec Flask et Pandas, exécutez la commande suivante :
